@@ -19,6 +19,16 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/usuarios/usuario-list').then((m) => m.UsuarioListComponent),
       },
+      {
+        path: 'cuentas',
+        loadComponent: () =>
+          import('./features/cuenta/cuenta-list').then((m) => m.CuentaListComponent),
+      },
+      {
+        path: 'tipos-cuenta',
+        loadComponent: () =>
+          import('./features/tipo-cuenta/tipo-cuenta-list').then((m) => m.TipoCuentaListComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },

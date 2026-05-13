@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>
+  {{ data.mode === 'edit' ? 'Editar Cuenta' : 'Nueva Cuenta' }}
+</h2>
+
+<mat-dialog-content>
+
+  <form 
+    [formGroup]="form"
+    (ngSubmit)="save()"
+    style="display: flex; flex-direction: column; gap: 16px; min-width: 400px;"
+  >
+
+    <mat-form-field appearance="outline">
+      <mat-label>Número de cuenta</mat-label>
+      <input matInput formControlName="numero_cuenta">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Saldo</mat-label>
+      <input matInput type="number" formControlName="saldo">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Usuario</mat-label>
+      <input matInput formControlName="id_usuario">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sucursal</mat-label>
+      <input matInput formControlName="id_sucursal">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de cuenta</mat-label>
+      <mat-select formControlName="id_tipo_cuenta">
+        <mat-option *ngFor="let t of tiposCuenta()" [value]="t.id_tipo_cuenta">
+          {{ t.nombre }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" style="padding: 16px;">
+  <button mat-button (click)="close()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="save()">Guardar</button>
+</mat-dialog-actions>
