@@ -43,14 +43,14 @@ export class LoginComponent implements OnInit {
 
   readonly loginForm = this.fb.nonNullable.group({
     nombre_usuario: ['', Validators.required],
-    clave: ['', Validators.required],
+    contraseña_hash: ['', Validators.required],
   });
 
   readonly firstUserForm = this.fb.nonNullable.group({
-    nombre_completo: ['', Validators.required],
+    nombre: ['', Validators.required],
     nombre_usuario: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    clave: ['', [Validators.required, Validators.minLength(4)]],
+    contraseña_hash: ['', [Validators.required, Validators.minLength(8)]],
     rol: ['admin', Validators.required],
     telefono: [''],
   });
@@ -62,8 +62,8 @@ export class LoginComponent implements OnInit {
   reload(): void {
     this.loading.set(true);
     this.usuarioService.list().subscribe({
-      next: (rows) => {
-        this.usuarios.set(rows);
+      next: (rows: any) => {
+        this.usuarios.set(rows.data);
         this.loading.set(false);
       },
       error: (err: HttpErrorResponse) => {
@@ -101,10 +101,10 @@ export class LoginComponent implements OnInit {
     const v = this.firstUserForm.getRawValue();
     this.usuarioService
       .create({
-        nombre_completo: v.nombre_completo,
+        nombre: v.nombre,
         nombre_usuario: v.nombre_usuario,
         email: v.email,
-        clave: v.clave,
+        contraseña: v.contraseña_hash,
         rol: v.rol,
         telefono: v.telefono || null,
         activo: true,

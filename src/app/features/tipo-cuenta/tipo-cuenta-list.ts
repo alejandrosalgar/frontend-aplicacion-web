@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -9,12 +10,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { filter } from 'rxjs/operators';
 
-import { UsuarioService } from '../../core/services/usuario.service';
-import { UsuarioRead } from '../../models/api.models';
-import { UsuarioDialogComponent, UsuarioDialogData } from './usuario-dialog';
+import { TipoCuentaService } from '../../core/services/tipo-cuenta.service';
+import { TipoCuentaRead } from '../../models/api.models';
+import { TipoCuentaDialog } from './tipo-cuenta-dialog';
 
 @Component({
-  selector: 'app-usuario-list',
+  selector: 'app-tipo-cuenta-list',
+  standalone: true,
   imports: [
     MatTableModule,
     MatPaginatorModule,
@@ -23,24 +25,26 @@ import { UsuarioDialogComponent, UsuarioDialogData } from './usuario-dialog';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    CommonModule,
   ],
-  templateUrl: './usuario-list.html',
-  styleUrl: './usuario-list.scss',
+  templateUrl: './tipo-cuenta-list.html',
+  styleUrl: './tipo-cuenta-list.scss',
 })
-export class UsuarioListComponent implements AfterViewInit {
-  private readonly usuarioService = inject(UsuarioService);
+export class TipoCuentaListComponent implements AfterViewInit {
+
+  private readonly tipoCuentaService = inject(TipoCuentaService);
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
 
   readonly displayedColumns = [
-    'nombre_usuario',
+    'id_tipo_cuenta',
+    'codigo',
     'nombre',
-    'email',
-    'rol',
-    'activo',
+    'id_usuario_creacion',
     'acciones',
   ];
-  readonly dataSource = new MatTableDataSource<UsuarioRead>([]);
+
+  readonly dataSource = new MatTableDataSource<TipoCuentaRead>([]);
 
   loading = true;
 
@@ -56,7 +60,7 @@ export class UsuarioListComponent implements AfterViewInit {
 
   reload(): void {
     this.loading = true;
-    this.usuarioService.list().subscribe({
+    this.tipoCuentaService.list().subscribe({
       next: (rows: any) => {
         this.dataSource.data = rows.data;
         this.loading = false;
@@ -69,29 +73,31 @@ export class UsuarioListComponent implements AfterViewInit {
   }
 
   nuevo(): void {
-    this.openDialog({ mode: 'create' });
+    this.openDialog(null);
   }
 
-  editar(row: UsuarioRead): void {
-    this.openDialog({ mode: 'edit', row });
+  editar(row: TipoCuentaRead): void {
+    this.openDialog(row);
   }
 
-  private openDialog(data: UsuarioDialogData): void {
+  private openDialog(data: any): void {
     this.dialog
-      .open(UsuarioDialogComponent, { width: '520px', data })
+      .open(TipoCuentaDialog, { width: '700px',maxWidth: '90vw', data })
       .afterClosed()
       .pipe(filter(Boolean))
       .subscribe(() => this.reload());
   }
 
-  eliminar(row: UsuarioRead): void {
-    if (!confirm(`¿Eliminar usuario ${row.nombre_usuario}?`)) return;
-    this.usuarioService.delete(row.id_usuario).subscribe({
+  eliminar(row: TipoCuentaRead): void {
+    if (!confirm(`¿Eliminar tipo de cuenta ${row.nombre}?`)) return;
+
+    this.tipoCuentaService.delete(row.id_tipo_cuenta).subscribe({
       next: () => {
-        this.snack.open('Usuario eliminado', 'OK', { duration: 3000 });
+        this.snack.open('Tipo de cuenta eliminado', 'OK', { duration: 3000 });
         this.reload();
       },
-      error: (err: HttpErrorResponse) => this.snack.open(this.msg(err), 'Cerrar', { duration: 6000 }),
+      error: (err: HttpErrorResponse) =>
+        this.snack.open(this.msg(err), 'Cerrar', { duration: 6000 }),
     });
   }
 

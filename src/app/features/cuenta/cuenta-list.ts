@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -9,12 +10,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { filter } from 'rxjs/operators';
 
-import { UsuarioService } from '../../core/services/usuario.service';
-import { UsuarioRead } from '../../models/api.models';
-import { UsuarioDialogComponent, UsuarioDialogData } from './usuario-dialog';
+import { CuentaService } from '../../core/services/cuenta.service';
+import { CuentaRead } from '../../models/api.models';
+import { CuentaDialog } from './cuenta-dialog';
+import { TipoCuentaService } from '../../core/services/tipo-cuenta.service';
 
 @Component({
-  selector: 'app-usuario-list',
+  selector: 'app-cuenta-list',
   imports: [
     MatTableModule,
     MatPaginatorModule,
@@ -23,26 +25,30 @@ import { UsuarioDialogComponent, UsuarioDialogData } from './usuario-dialog';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    CommonModule,
   ],
-  templateUrl: './usuario-list.html',
-  styleUrl: './usuario-list.scss',
+  templateUrl: './cuenta-list.html',
+  styleUrl: './cuenta-list.scss',
 })
-export class UsuarioListComponent implements AfterViewInit {
-  private readonly usuarioService = inject(UsuarioService);
+export class CuentaListComponent implements AfterViewInit {
+  private readonly cuentaService = inject(CuentaService);
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
+  private readonly tipoCuentaService = inject(TipoCuentaService);
 
   readonly displayedColumns = [
-    'nombre_usuario',
-    'nombre',
-    'email',
-    'rol',
-    'activo',
+    'id_cuenta',
+    'numero_cuenta',
+    'saldo',
+    'id_usuario',
+    'id_sucursal',
+    'id_tipo_cuenta',
     'acciones',
   ];
-  readonly dataSource = new MatTableDataSource<UsuarioRead>([]);
+  readonly dataSource = new MatTableDataSource<CuentaRead>([]);
 
   loading = true;
+  tiposCuenta: any[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -52,11 +58,12 @@ export class UsuarioListComponent implements AfterViewInit {
 
   constructor() {
     this.reload();
+    this.loadTiposCuenta();
   }
 
   reload(): void {
     this.loading = true;
-    this.usuarioService.list().subscribe({
+    this.cuentaService.list().subscribe({
       next: (rows: any) => {
         this.dataSource.data = rows.data;
         this.loading = false;
@@ -68,27 +75,38 @@ export class UsuarioListComponent implements AfterViewInit {
     });
   }
 
+  loadTiposCuenta(): void {
+  this.tipoCuentaService.list().subscribe({
+      next: (res: any) => this.tiposCuenta = res.data,
+      error: () => this.snack.open('Error cargando tipos de cuenta', 'Cerrar'),
+    });
+  }
+
+  getNombreTipoCuenta(id: string): string {
+    return this.tiposCuenta.find(t => t.id_tipo_cuenta === id)?.nombre || id;
+  }
+
   nuevo(): void {
     this.openDialog({ mode: 'create' });
   }
 
-  editar(row: UsuarioRead): void {
+  editar(row: CuentaRead): void {
     this.openDialog({ mode: 'edit', row });
   }
 
-  private openDialog(data: UsuarioDialogData): void {
+  private openDialog(data: any): void {
     this.dialog
-      .open(UsuarioDialogComponent, { width: '520px', data })
+      .open(CuentaDialog, { width: '520px', data })
       .afterClosed()
       .pipe(filter(Boolean))
       .subscribe(() => this.reload());
   }
 
-  eliminar(row: UsuarioRead): void {
-    if (!confirm(`¿Eliminar usuario ${row.nombre_usuario}?`)) return;
-    this.usuarioService.delete(row.id_usuario).subscribe({
+  eliminar(row: CuentaRead): void {
+    if (!confirm(`¿Eliminar cuenta ${row.numero_cuenta}?`)) return;
+    this.cuentaService.delete(row.id_cuenta).subscribe({
       next: () => {
-        this.snack.open('Usuario eliminado', 'OK', { duration: 3000 });
+        this.snack.open('Cuenta eliminada', 'OK', { duration: 3000 });
         this.reload();
       },
       error: (err: HttpErrorResponse) => this.snack.open(this.msg(err), 'Cerrar', { duration: 6000 }),

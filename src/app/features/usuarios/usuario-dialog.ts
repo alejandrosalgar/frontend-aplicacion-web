@@ -38,10 +38,10 @@ export class UsuarioDialogComponent {
   readonly data = inject<UsuarioDialogData>(MAT_DIALOG_DATA);
 
   readonly form = this.fb.nonNullable.group({
-    nombre_completo: ['', Validators.required],
+    nombre: ['', Validators.required],
     nombre_usuario: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    clave: [''],
+    contraseña_hash: [''],
     rol: ['', Validators.required],
     telefono: [''],
     activo: [true],
@@ -51,17 +51,17 @@ export class UsuarioDialogComponent {
     if (this.data.mode === 'edit' && this.data.row) {
       const r = this.data.row;
       this.form.patchValue({
-        nombre_completo: r.nombre_completo,
+        nombre: r.nombre,
         nombre_usuario: r.nombre_usuario,
         email: r.email,
-        clave: '',
+        contraseña_hash: '',
         rol: r.rol,
         telefono: r.telefono ?? '',
         activo: r.activo,
       });
     }
     if (this.data.mode === 'create') {
-      this.form.controls.clave.setValidators([Validators.required, Validators.minLength(4)]);
+      this.form.controls.contraseña_hash.setValidators([Validators.required, Validators.minLength(8)]);
     }
   }
 
@@ -74,14 +74,15 @@ export class UsuarioDialogComponent {
       this.form.markAllAsTouched();
       return;
     }
+    console.log('CLICK SAVE');
     const v = this.form.getRawValue();
     if (this.data.mode === 'create') {
       this.usuarioService
         .create({
-          nombre_completo: v.nombre_completo,
+          nombre: v.nombre,
           nombre_usuario: v.nombre_usuario,
           email: v.email,
-          clave: v.clave,
+          contraseña: v.contraseña_hash,
           rol: v.rol,
           telefono: v.telefono || null,
           activo: v.activo,
@@ -90,19 +91,20 @@ export class UsuarioDialogComponent {
           next: () => this.dialogRef.close(true),
           error: (err: HttpErrorResponse) => this.snack.open(this.msg(err), 'Cerrar', { duration: 6000 }),
         });
+        
       return;
     }
     const id = this.data.row!.id_usuario;
     const body: UsuarioUpdate = {
-      nombre_completo: v.nombre_completo,
+      nombre: v.nombre,
       nombre_usuario: v.nombre_usuario,
       email: v.email,
       rol: v.rol,
       telefono: v.telefono || null,
       activo: v.activo,
     };
-    if (v.clave?.trim()) {
-      body.clave = v.clave;
+    if (v.contraseña_hash?.trim()) {
+      body.contraseña_hash = v.contraseña_hash;
     }
     this.usuarioService.update(id, body).subscribe({
       next: () => this.dialogRef.close(true),
