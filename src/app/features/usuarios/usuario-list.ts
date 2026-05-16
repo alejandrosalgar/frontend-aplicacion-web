@@ -34,7 +34,7 @@ export class UsuarioListComponent implements AfterViewInit {
 
   readonly displayedColumns = [
     'nombre_usuario',
-    'nombre_completo',
+    'nombre',
     'email',
     'rol',
     'activo',

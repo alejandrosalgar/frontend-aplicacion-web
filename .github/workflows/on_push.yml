@@ -1,0 +1,30 @@
+# Pipeline CI para los Pull Request a dev, qa y prod
+
+name: CI_Push
+
+on:
+    push:
+        branches: [dev, qa, prod]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/banco_test
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Configurar node
+          uses: actions/setup-node@v4
+          with:
+            node-version: "22"
+
+        - name: Build (Angular)
+          run: npm run build
+
+        - name: Deploy (Firebase)
+          run: firebase deploy --only hosting

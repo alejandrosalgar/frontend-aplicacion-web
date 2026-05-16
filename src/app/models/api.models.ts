@@ -2,7 +2,7 @@
 
 export interface UsuarioRead {
     id_usuario: string;
-    nombre_completo: string;
+    nombre: string;
     nombre_usuario: string;
     email: string;
     rol: string;
@@ -11,20 +11,20 @@ export interface UsuarioRead {
   }
   
   export interface UsuarioCreate {
-    nombre_completo: string;
+    nombre: string;
     nombre_usuario: string;
     email: string;
-    clave: string;
+    contraseña: string;
     rol: string;
     telefono?: string | null;
     activo?: boolean;
   }
   
   export interface UsuarioUpdate {
-    nombre_completo?: string;
+    nombre?: string;
     nombre_usuario?: string;
     email?: string;
-    clave?: string;
+    contraseña?: string;
     rol?: string;
     telefono?: string | null;
     activo?: boolean;
@@ -166,3 +166,5 @@ export interface UsuarioRead {
     tipo_pago?: string;
     id_usuario_edita: string;
   }
+
+  
